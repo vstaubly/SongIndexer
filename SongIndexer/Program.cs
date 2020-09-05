@@ -15,13 +15,20 @@ namespace SongIndexer
             string startingDirectory = ".";
             int totalFiles = 0;
             int totalSongsParsed = 0;
-            string connStr = "";
+            string connStr = null;
 
-            if (args.Length > 0)
+            if (args.Length > 0) {
                 startingDirectory = args[0];
-            SongWriter writer = new SongWriter(connStr);
-            if (! writer.connect())
-                writer = null;
+                if (args.Length > 1) {
+                    connStr = args[1];
+                }
+            }
+            SongWriter writer = null;
+            if (connStr != null) {
+                writer = new SongWriter(connStr);
+                if (!writer.connect())
+                    writer = null;
+            }
             string[] files = Directory.GetFiles(startingDirectory, "*.mp3", SearchOption.AllDirectories);
             foreach (string file in files) {
                 Mp3Parser parser = new Mp3Parser(file);
@@ -32,8 +39,7 @@ namespace SongIndexer
                     else
                         Console.Out.WriteLine("No data for " + file);
                 }
-                if ((song != null) && (song.Title != null))
-                {
+                if ((song != null) && (song.Title != null)) {
                     if (writer != null)
                         writer.writeSong(song);
                     totalSongsParsed++;
