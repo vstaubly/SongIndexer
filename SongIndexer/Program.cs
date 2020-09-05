@@ -19,7 +19,10 @@ namespace SongIndexer
             {
                 Mp3Parser parser = new Mp3Parser(file);
                 SongFile song = parser.parse();
-                Console.Out.WriteLine("" + song);
+                if (song != null)
+                    Console.Out.WriteLine("" + song);
+                else
+                    Console.Out.WriteLine("No data for " + file);
             }
         }
     }

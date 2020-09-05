@@ -10,9 +10,10 @@ namespace SongIndexer
     public class Mp3Parser
     {
         private FileStream stream;
-        private byte[] buffer = new byte[1024];
+        private byte[] buffer = new byte[4096];
         private int bytesRead = 0;
         private SongFile song;
+        private bool verbose = false;
 
         public Mp3Parser(string filename)
         {
@@ -31,13 +32,14 @@ namespace SongIndexer
             try
             {
                 stream = new FileStream(song.Filename, FileMode.Open);
-                bytesRead = stream.Read(buffer, 0, 1024); // should be enough to include ID3 headers & tags
+                bytesRead = stream.Read(buffer, 0, buffer.Length); // should be enough to include ID3 headers & tags
                 int offset = readHeader(0);
                 while (offset > 0) {
                     offset = readNextTag(offset);
                 }
-            } catch {
+            } catch (Exception e) {
                 // should log error here
+                Console.Error.WriteLine("Exception: " + e);
                 return null;
             } finally {
                 if (stream != null)
@@ -52,23 +54,20 @@ namespace SongIndexer
         {
             byte[] idHeader = { (byte)'I', (byte)'D', (byte)'3' };
 
-            for (int i = offset; i < idHeader.Length; i++) {
-                if (i >= bytesRead) {
+            for (int i = 0; i < idHeader.Length; i++) {
+                if ((i + offset) >= bytesRead) {
                     // not enough data to match ID3 header
                     return -1;
                 }
-                if (buffer[i] != idHeader[i - offset]) {
+                if (buffer[i + offset] != idHeader[i]) {
                     return -1;
                 }
             }
             offset += idHeader.Length;
             // should check version here... not going to for now
-            offset += 2; // skip version
-            Int32 length = 0;
-            for (int i = 0; i < 4; i++) {
-                length |= (buffer[offset + i] & 0x7F) << (7 * i);
-            }
-            if (length > bytesRead) {
+            offset += 3; // skip version and flags
+            Int32 length = getID3LengthField(offset);
+            if (verbose && (length > bytesRead)) {
                 Console.Error.WriteLine("Warning: did not read enough data to parse all ID3 tags, length=" + length);
             }
             offset += 4;
@@ -86,48 +85,63 @@ namespace SongIndexer
                 typeTag[i] = buffer[i + offset];
             }
             offset += 4; // advance past tag ID bytes
-            Int32 length = 0;
-            for (int i = 0; i < 4; i++)
-            {
-                length |= (buffer[offset + i] & 0x7F) << (7 * i);
-            }
+            Int32 length = getID3LengthField(offset);
             offset += 6; // advance past tag length field, and flags
             byte[] tagData = null;
-            if (length > 0) // length field does not include tag header, so we check for any data at all
-            {
+            if ((length > 0) && (length + offset < bytesRead)) {
+                // length field does not include tag header, so we check for any data at all
                 tagData = new byte[length];
                 for (int i = 0; i < length; i++) {
                     tagData[i] = buffer[i + offset];
                 }
+                handleTagTypes(typeTag, tagData);
             }
-            handleTagTypes(typeTag, tagData);
             return offset + length;
+        }
+
+        // reads the weird ID3 length fields... big-endian, but only 7 bits about of every byte
+        Int32 getID3LengthField(int offset)
+        {
+            Int32 length = 0;
+            for (int i = 0, shift = 3; i < 4; i++, shift--) {
+                length |= (buffer[offset + i] & 0x7F) << (7 * shift);
+            }
+            if (verbose)
+                Console.Out.WriteLine("getID3LengthField: offset=" + offset + " length=" + length);
+            return length;
         }
 
         void handleTagTypes(byte[] type, byte[] data)
         {
             string typeStr = Encoding.UTF8.GetString(type, 0, type.Length);
-            string dataStr = Encoding.UTF8.GetString(data, 0, data.Length);
+            string dataStr = null;
 
+            if (verbose)
+                Console.Out.WriteLine("Tag=" + typeStr);
             if ("TIT2".Equals(typeStr))
             {
+                dataStr = Encoding.UTF8.GetString(data, 0, data.Length);
                 song.Title = dataStr;
             }
             else if ("TALB".Equals(typeStr))
             {
+                dataStr = Encoding.UTF8.GetString(data, 0, data.Length);
                 song.Album = dataStr;
             }
             else if ("TPE1".Equals(typeStr))
             {
+                dataStr = Encoding.UTF8.GetString(data, 0, data.Length);
                 song.Artist = dataStr;
             }
             else if ("TYER".Equals(typeStr))
             {
+                dataStr = Encoding.UTF8.GetString(data, 0, data.Length);
                 song.Year = dataStr;
             }
             else if ("TRCK".Equals(typeStr))
             {
-                song.Track = dataStr;
+                // TBD.... track is numeric field
+                // song.Track = dataStr;
             }
         }
     }
