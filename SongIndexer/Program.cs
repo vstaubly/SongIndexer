@@ -17,8 +17,8 @@ namespace SongIndexer
             string[] files = Directory.GetFiles(startingDirectory, "*.mp3", SearchOption.AllDirectories);
             foreach (string file in files)
             {
-                SongFile song = new SongFile();
-                song.parseMP3(file);
+                Mp3Parser parser = new Mp3Parser(file);
+                SongFile song = parser.parse();
                 Console.Out.WriteLine("" + song);
             }
         }
