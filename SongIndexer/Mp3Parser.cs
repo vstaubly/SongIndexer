@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 
 namespace SongIndexer
 {
+    // based on MP3/ID3 format reference at https://id3.org/id3v2.4.0-structure
     public class Mp3Parser
     {
         private FileStream stream;
@@ -111,6 +112,18 @@ namespace SongIndexer
             return length;
         }
 
+        string encodeTagData(byte[] data)
+        {
+            int zeroBytes = 0;
+            for (int i = 0; i < data.Length; i++)
+                if (data[i] == 0)
+                    zeroBytes++;
+            if (zeroBytes < (data.Length / 2))
+                return Encoding.UTF8.GetString(data, 0, data.Length);
+            else
+                return Encoding.Unicode.GetString(data, 0, data.Length);
+        }
+
         void handleTagTypes(byte[] type, byte[] data)
         {
             string typeStr = Encoding.UTF8.GetString(type, 0, type.Length);
@@ -120,22 +133,22 @@ namespace SongIndexer
                 Console.Out.WriteLine("Tag=" + typeStr);
             if ("TIT2".Equals(typeStr))
             {
-                dataStr = Encoding.UTF8.GetString(data, 0, data.Length);
+                dataStr = encodeTagData(data);
                 song.Title = dataStr;
             }
             else if ("TALB".Equals(typeStr))
             {
-                dataStr = Encoding.UTF8.GetString(data, 0, data.Length);
+                dataStr = encodeTagData(data);
                 song.Album = dataStr;
             }
             else if ("TPE1".Equals(typeStr))
             {
-                dataStr = Encoding.UTF8.GetString(data, 0, data.Length);
+                dataStr = encodeTagData(data);
                 song.Artist = dataStr;
             }
             else if ("TYER".Equals(typeStr))
             {
-                dataStr = Encoding.UTF8.GetString(data, 0, data.Length);
+                dataStr = encodeTagData(data);
                 song.Year = dataStr;
             }
             else if ("TRCK".Equals(typeStr))
