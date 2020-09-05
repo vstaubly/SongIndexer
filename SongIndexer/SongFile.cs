@@ -19,7 +19,7 @@ namespace SongIndexer
         public override string ToString()
         {
             string descr = "Song ";
-            if (Title == null)
+            if ((Title == null) && (Artist == null) && (Album == null))
                 descr += " filename=" + Filename;
             if (Title != null)
                 descr += " title=" + Title;
