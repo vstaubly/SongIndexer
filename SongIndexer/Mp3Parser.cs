@@ -115,13 +115,20 @@ namespace SongIndexer
         string encodeTagData(byte[] data)
         {
             int zeroBytes = 0;
-            for (int i = 0; i < data.Length; i++)
+            for (int i = 0; i < data.Length; i++) {
                 if (data[i] == 0)
                     zeroBytes++;
-            if (zeroBytes < (data.Length / 2))
+            }
+            if (zeroBytes < 3) {
                 return Encoding.UTF8.GetString(data, 0, data.Length);
-            else
-                return Encoding.Unicode.GetString(data, 0, data.Length);
+            } else {
+                string dataStr = "";
+                for (int i = 0; i < data.Length; i++) {
+                    if ((data[i] > 0x1F) && (data[i] < 0x7F)) // strict ASCII filter
+                        dataStr += (char)data[i];
+                }
+                return dataStr;
+            }
         }
 
         void handleTagTypes(byte[] type, byte[] data)
