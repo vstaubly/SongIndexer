@@ -11,13 +11,16 @@ namespace SongIndexer
     {
         static void Main(string[] args)
         {
-            Console.Out.WriteLine("Hello World");
             string startingDirectory = ".";
             if (args.Length > 0)
                 startingDirectory = args[0];
             string[] files = Directory.GetFiles(startingDirectory, "*.mp3", SearchOption.AllDirectories);
             foreach (string file in files)
-                Console.Out.WriteLine("File=" + file);
+            {
+                SongFile song = new SongFile();
+                song.parseMP3(file);
+                Console.Out.WriteLine("" + song);
+            }
         }
     }
 }
