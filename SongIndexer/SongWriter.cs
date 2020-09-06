@@ -21,6 +21,7 @@ namespace SongIndexer
         {
             try {
                 conn = new OdbcConnection(connectionString);
+                conn.Open();
                 return true;
             } catch (Exception e) {
                 Console.Error.WriteLine("Error connecting to database: " + this.connectionString);
@@ -28,21 +29,30 @@ namespace SongIndexer
                 return false;
             }
         }
-
+        /*
         public bool writeSong(SongFile song)
         {
             string query = "INSERT INTO songs ( title, artist, album, year, track ) VALUES ( ?, ?, ?, ?, ? )";
 
             OdbcCommand cmd = new OdbcCommand(query, conn);
-            cmd.Parameters[0].Value = song.Title;
-            cmd.Parameters[1].Value = song.Artist;
-            cmd.Parameters[2].Value = song.Album;
-            cmd.Parameters[3].Value = song.Year;
-            cmd.Parameters[4].Value = song.Track;
+            cmd.Parameters.Add("title", OdbcType.Text).Value = song.Title;
+            cmd.Parameters.Add("artist", OdbcType.Text).Value = song.Artist;
+            cmd.Parameters.Add("album", OdbcType.Text).Value = song.Album;
+            cmd.Parameters.Add("year", OdbcType.Text).Value = song.Year;
+            cmd.Parameters.Add("track", OdbcType.Text).Value = song.Track;
             cmd.ExecuteNonQuery();
             return true;
         }
-
+        */
+        public bool writeSong(SongFile song)
+        {
+            string query = "INSERT INTO songs ( title, artist, album, year, track ) VALUES ( '" + song.Title +
+                "', '" + song.Artist + "', '" + song.Album + "', '" + song.Year + "', null )";
+            Console.Out.WriteLine("Query=" + query);
+            OdbcCommand cmd = new OdbcCommand(query, conn);
+            cmd.ExecuteNonQuery();
+            return true;
+        }
         public void close()
         {
             if (conn != null)
