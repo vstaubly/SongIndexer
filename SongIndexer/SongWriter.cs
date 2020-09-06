@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data.Common;
 using System.Data.Odbc;
 using System.Linq;
 using System.Text;
@@ -30,21 +31,32 @@ namespace SongIndexer
                 return false;
             }
         }
+
+        public OdbcParameter makeStringParam(OdbcCommand cmd, string fieldname, string value)
+        {
+            OdbcParameter param = cmd.CreateParameter();
+            param.ParameterName = fieldname;
+            param.DbType = System.Data.DbType.String;
+            param.Value = value;
+            return param;
+        }
+
         /*
         public bool writeSong(SongFile song)
         {
             string query = "INSERT INTO songs ( title, artist, album, year, track ) VALUES ( ?, ?, ?, ?, ? )";
 
             OdbcCommand cmd = new OdbcCommand(query, conn);
-            cmd.Parameters.Add("title", OdbcType.Text).Value = song.Title;
-            cmd.Parameters.Add("artist", OdbcType.Text).Value = song.Artist;
-            cmd.Parameters.Add("album", OdbcType.Text).Value = song.Album;
-            cmd.Parameters.Add("year", OdbcType.Text).Value = song.Year;
-            cmd.Parameters.Add("track", OdbcType.Text).Value = song.Track;
+            cmd.Parameters.Add(makeStringParam(cmd, "title", song.Title));
+            cmd.Parameters.Add(makeStringParam(cmd, "artist", song.Artist));
+            cmd.Parameters.Add(makeStringParam(cmd, "album", song.Album));
+            cmd.Parameters.Add(makeStringParam(cmd, "year", song.Year));
+            cmd.Parameters.Add(makeStringParam(cmd, "track", song.Track));
             cmd.ExecuteNonQuery();
             return true;
         }
         */
+
         private string quoteString(string s)
         {
             if ((s == null) || (s.Length < 1)) {
@@ -53,6 +65,7 @@ namespace SongIndexer
                 return "'" + s.Replace("'", "''") + "'";
             }
         }
+
         public bool writeSong(SongFile song)
         {
             string query = "INSERT INTO songs ( title, artist, album, year, track ) VALUES ( " + quoteString(song.Title) +
@@ -64,6 +77,7 @@ namespace SongIndexer
             cmd.ExecuteNonQuery();
             return true;
         }
+
         public void close()
         {
             if (conn != null)
