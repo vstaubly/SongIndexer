@@ -26,6 +26,7 @@ namespace SongIndexer
             SongWriter writer = null;
             if (connStr != null) {
                 writer = new SongWriter(connStr);
+                writer.Verbose = verbose;
                 if (!writer.connect())
                     writer = null;
             }

@@ -119,7 +119,7 @@ namespace SongIndexer
                 if (data[i] == 0)
                     zeroBytes++;
             }
-            if (zeroBytes < 3) {
+            if (false) {
                 return Encoding.UTF8.GetString(data, 0, data.Length);
             } else {
                 string dataStr = "";

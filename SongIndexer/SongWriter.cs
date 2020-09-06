@@ -11,6 +11,7 @@ namespace SongIndexer
     {
         private string connectionString = null;
         private OdbcConnection conn = null;
+        public bool Verbose { get; set; }
 
         public SongWriter(string connectionString)
         {
@@ -44,11 +45,21 @@ namespace SongIndexer
             return true;
         }
         */
+        private string quoteString(string s)
+        {
+            if ((s == null) || (s.Length < 1)) {
+                return "null";
+            } else {
+                return "'" + s.Replace("'", "''") + "'";
+            }
+        }
         public bool writeSong(SongFile song)
         {
-            string query = "INSERT INTO songs ( title, artist, album, year, track ) VALUES ( '" + song.Title +
-                "', '" + song.Artist + "', '" + song.Album + "', '" + song.Year + "', null )";
-            Console.Out.WriteLine("Query=" + query);
+            string query = "INSERT INTO songs ( title, artist, album, year, track ) VALUES ( " + quoteString(song.Title) +
+                ", " + quoteString(song.Artist) + ", " + quoteString(song.Album) + ", " + quoteString(song.Year) + ", " +
+                quoteString(song.Track) + " )";
+            if (Verbose)
+                Console.Out.WriteLine("Query=" + query);
             OdbcCommand cmd = new OdbcCommand(query, conn);
             cmd.ExecuteNonQuery();
             return true;
