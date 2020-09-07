@@ -1,4 +1,7 @@
-﻿using System;
+﻿//
+// Basic model class representing a song
+// 
+using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
@@ -16,6 +19,7 @@ namespace SongIndexer
         public string Year { get; set; }
         public string Track { get; set; }
 
+        // makes logging/debugging easier
         public override string ToString()
         {
             string descr = "Song ";

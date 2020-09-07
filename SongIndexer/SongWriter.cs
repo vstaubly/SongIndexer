@@ -1,4 +1,9 @@
-﻿using System;
+﻿//
+// Basic DAO file for SongFile objects... if we had more classes to read/write
+//     or more operations to handle, would probably split DB connection management
+//     from object read/write operations
+//
+using System;
 using System.Collections.Generic;
 using System.Data.Common;
 using System.Data.Odbc;

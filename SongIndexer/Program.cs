@@ -22,7 +22,7 @@ namespace SongIndexer
                 if (args.Length > 1) {
                     connStr = args[1];
                 }
-            }
+            } // else, should display "Usage" info
             SongWriter writer = null;
             if (connStr != null) {
                 writer = new SongWriter(connStr);

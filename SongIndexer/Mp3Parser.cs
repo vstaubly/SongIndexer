@@ -1,4 +1,8 @@
-﻿using System;
+﻿//
+// Reads a SongFile object from an MP3 file... could serve as template for reading from other formats (ACC/AIFF/etc.)
+//   (WAV and other files don't contain metadata about the song)
+//
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
